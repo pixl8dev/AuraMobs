@@ -3,6 +3,7 @@ name: AuraMobs
 authors: [Archyx, _OfTeN_]
 version: ${projectVersion}
 api-version: 1.16
+folia-supported: true
 depend:
   - AuraSkills
 softdepend:

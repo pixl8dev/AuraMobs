@@ -21,7 +21,6 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.List;
 import java.util.Locale;
@@ -81,7 +80,7 @@ public class MobSpawn implements Listener {
 
             int radius = plugin.optionInt("player_level.check_radius");
 
-            changeMob(entity, radius).runTask(plugin);
+            changeMob(entity, radius);
         } catch (NullPointerException ex) {
             plugin.getLogger().severe(ex.getMessage());
         }
@@ -108,51 +107,48 @@ public class MobSpawn implements Listener {
         }
     }
 
-    public BukkitRunnable changeMob(LivingEntity entity, int radius) {
-        return new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (entity.isDead() || !entity.isValid()) {
-                    return;
-                }
+    public void changeMob(LivingEntity entity, int radius) {
+        entity.getScheduler().run(plugin, task -> {
+            if (entity.isDead() || !entity.isValid()) {
+                return;
+            }
 
-                if (plugin.isMythicMobsEnabled() && entity.getPersistentDataContainer().has(MobKeys.TYPE, PersistentDataType.STRING) && plugin.ignoreMythicMobs()) {
-                    return;
-                }
+            if (plugin.isMythicMobsEnabled() && entity.getPersistentDataContainer().has(MobKeys.TYPE, PersistentDataType.STRING) && plugin.ignoreMythicMobs()) {
+                return;
+            }
 
-                int sumlevel = 0;
-                int maxlevel = Integer.MIN_VALUE;
-                int minlevel = Integer.MAX_VALUE;
-                int playercount = 0;
+            int sumlevel = 0;
+            int maxlevel = Integer.MIN_VALUE;
+            int minlevel = Integer.MAX_VALUE;
+            int playercount = 0;
 
-                for (Entity entity : entity.getNearbyEntities(radius, radius, radius)) {
-                    if (entity instanceof Player player) {
-                        if (player.hasMetadata("NPC")) continue;
-                        int lvl = plugin.getLevel(player);
-                        sumlevel += lvl;
-                        playercount++;
-                        if (lvl > maxlevel) {
-                            maxlevel = lvl;
-                        }
-                        if (lvl < minlevel) {
-                            minlevel = lvl;
-                        }
+            for (Entity nearby : entity.getNearbyEntities(radius, radius, radius)) {
+                if (nearby instanceof Player player) {
+                    if (player.hasMetadata("NPC")) continue;
+                    int lvl = plugin.getLevel(player);
+                    sumlevel += lvl;
+                    playercount++;
+                    if (lvl > maxlevel) {
+                        maxlevel = lvl;
+                    }
+                    if (lvl < minlevel) {
+                        minlevel = lvl;
                     }
                 }
-                Location mobloc = entity.getLocation();
-                Location spawnpoint = entity.getWorld().getSpawnLocation();
-                double distance = mobloc.distance(spawnpoint);
-                int level;
-
-                int overrideLevel = getMetadataLevel(entity);
-                if (overrideLevel != 0) {
-                    level = overrideLevel;
-                } else {
-                    level = getCalculatedLevel(entity, playercount, distance, maxlevel, minlevel, sumlevel);
-                }
-                new AureliumMob(entity, correctLevel(entity.getLocation(), level), plugin);
             }
-        };
+            Location mobloc = entity.getLocation();
+            Location spawnpoint = entity.getWorld().getSpawnLocation();
+            double distance = mobloc.distance(spawnpoint);
+            int level;
+
+            int overrideLevel = getMetadataLevel(entity);
+            if (overrideLevel != 0) {
+                level = overrideLevel;
+            } else {
+                level = getCalculatedLevel(entity, playercount, distance, maxlevel, minlevel, sumlevel);
+            }
+            new AureliumMob(entity, correctLevel(entity.getLocation(), level), plugin);
+        }, null);
     }
 
     private int getCalculatedLevel(LivingEntity entity, int playercount, double distance, int maxlevel, int minlevel, int sumlevel) {

@@ -32,3 +32,4 @@ build.xml
 .gradle/
 build/
 run/
+bin/
