@@ -22,7 +22,7 @@ public class AureliumMob {
 
     public AureliumMob(LivingEntity mob, int level, AuraMobs plugin) {
         if (mob instanceof Zombie) {
-            mob.getAttribute(Attribute.GENERIC_MAX_HEALTH).getModifiers().clear();
+            mob.getAttribute(Attribute.MAX_HEALTH).getModifiers().clear();
         }
 
         int level1;
@@ -36,9 +36,9 @@ public class AureliumMob {
         Location mobloc = mob.getLocation();
         Location spawnpoint = mob.getWorld().getSpawnLocation();
         double distance = mobloc.distance(spawnpoint);
-        double startDamage = getAttributeBaseValue(mob, Attribute.GENERIC_ATTACK_DAMAGE);
-        double startHealth = getAttributeBaseValue(mob, Attribute.GENERIC_MAX_HEALTH);
-        double startSpeed = getAttributeBaseValue(mob, Attribute.GENERIC_MOVEMENT_SPEED);
+        double startDamage = getAttributeBaseValue(mob, Attribute.ATTACK_DAMAGE);
+        double startHealth = getAttributeBaseValue(mob, Attribute.MAX_HEALTH);
+        double startSpeed = getAttributeBaseValue(mob, Attribute.MOVEMENT_SPEED);
 
         String prefix = plugin.isBossMob(mob) ? "bosses." : "mob_defaults.";
         String damageFormula = MessageUtils.setPlaceholders(null, plugin.optionString(prefix + "damage.formula")
@@ -121,11 +121,11 @@ public class AureliumMob {
             speed = plugin.getMaxSpeed();
         }
 
-        setAttributeBaseValue(mob, Attribute.GENERIC_ATTACK_DAMAGE, damage);
-        setAttributeBaseValue(mob, Attribute.GENERIC_MOVEMENT_SPEED, speed);
-        setAttributeBaseValue(mob, Attribute.GENERIC_MAX_HEALTH, health);
+        setAttributeBaseValue(mob, Attribute.ATTACK_DAMAGE, damage);
+        setAttributeBaseValue(mob, Attribute.MOVEMENT_SPEED, speed);
+        setAttributeBaseValue(mob, Attribute.MAX_HEALTH, health);
 
-        AttributeInstance healthAttr = mob.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        AttributeInstance healthAttr = mob.getAttribute(Attribute.MAX_HEALTH);
         if (healthAttr == null) return;
 
         double maxValue = healthAttr.getValue();
