@@ -33,3 +33,4 @@ build.xml
 build/
 run/
 bin/
+.DS_Store
